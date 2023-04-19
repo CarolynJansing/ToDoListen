@@ -1,0 +1,119 @@
+openapi: '3.0.2'
+info:
+  title: Get and Post Api
+  version: '1.0'
+  
+  description: |-
+    API die im Unterricht zum Ausprobieren entwickelt wurde
+servers:
+  - url: http://localhost:5000
+
+tags:
+  - name: Get
+    description: Get Endpunkt (kann sowohl get, als auch post) 
+  - name: Post
+    description: Post Endpunkt (kann sowohl get, als auch post)
+
+paths:
+  /get:
+    get:
+      tags: 
+        - Get
+      description: Endpunkt für GET Anfragen
+      parameters:
+        - name: param1
+          in: query
+          schema: 
+            type: string
+        - name: param2
+          in: query
+          schema:
+            type: string
+
+      responses: 
+        '200':
+          "$ref": "#/components/responses/200"
+        '500':
+          "$ref": "#/components/responses/500"
+    post:
+      tags: 
+        - Get
+      description: Endpunkt für POST Anfragen
+      requestBody:
+        description: JSON Objekt das alle Parameter beinhaltet
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/GeneralRequest"
+
+      responses: 
+        '200':
+          "$ref": "#/components/responses/200"
+        '500':
+          "$ref": "#/components/responses/500"
+  /post:
+    get:
+      tags: 
+        - Post
+      description: Endpunkt für GET Anfragen
+      parameters:
+        - name: param1
+          in: query
+          schema: 
+            type: string
+        - name: param2
+          in: query
+          schema:
+            type: string
+
+      responses: 
+        '200':
+          "$ref": "#/components/responses/200"
+        '500':
+          "$ref": "#/components/responses/500"
+    post:
+      tags: 
+        - Post
+      description: Endpunkt für POST Anfragen
+      requestBody:
+        description: JSON Objekt das alle Parameter beinhaltet
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/GeneralRequest"
+
+      responses: 
+        '200':
+          "$ref": "#/components/responses/200"
+        '500':
+          "$ref": "#/components/responses/500"
+
+components:
+  schemas:
+    GeneralRequest:
+      type: object
+      properties:
+        param1: 
+          type: string
+          example: any value
+        param2:
+          type: string
+          example: Hello World
+    GeneralResponse:
+      type: object
+      properties:
+        param1: 
+          type: string
+          example: param1 that was passed in the request
+        param2:
+          type: string
+          example: param2 that was passed in the request
+  responses:
+    200:
+      description: OK
+      content:
+        application/json:
+          schema: 
+            "$ref": "#/components/schemas/GeneralResponse"
+    500:
+      description: Internal Server Error
