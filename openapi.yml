@@ -1,119 +1,201 @@
-openapi: '3.0.2'
+openapi: 3.0.0
 info:
-  title: Get and Post Api
-  version: '1.0'
-  
-  description: |-
-    API die im Unterricht zum Ausprobieren entwickelt wurde
+  title: Todo List API
+  version: 1.0.0
 servers:
-  - url: http://localhost:5000
-
-tags:
-  - name: Get
-    description: Get Endpunkt (kann sowohl get, als auch post) 
-  - name: Post
-    description: Post Endpunkt (kann sowohl get, als auch post)
-
+  - url: http://localhost:8000/api/v1
 paths:
-  /get:
+  /todo-list/{list_id}:
     get:
-      tags: 
-        - Get
-      description: Endpunkt für GET Anfragen
+      summary: Liefert alle Einträge einer Todo-Liste zurück
       parameters:
-        - name: param1
-          in: query
-          schema: 
-            type: string
-        - name: param2
-          in: query
+        - in: query
+          name: list_id
+          required: true
+          description: ID der gewünschten Liste
           schema:
             type: string
-
-      responses: 
-        '200':
-          "$ref": "#/components/responses/200"
-        '500':
-          "$ref": "#/components/responses/500"
+      responses:
+        200:
+          description: Liste aller Einträge der gegebenen Liste
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          description: ID nicht vorhanden
+    delete:
+      summary: Löscht eine komplette Todo-Liste mit allen Einträgen
+      parameters:
+        - in: path
+          name: list_id
+          required: true
+          description: ID der gewünschten Liste
+          schema:
+            type: string
+      responses:
+        200:
+          description: Liste gelöscht
+        404:
+          description: ID nicht vorhanden
+        500:
+          description: Beim Schreiben ein Fehler aufgetreten
+    patch:
+      summary: Aktualisiert den Namen einer bestehenden Todo-Liste
+      parameters:
+        - in: path
+          name: list_id
+          required: true
+          description: ID der gewünschten Liste
+          schema:
+            type: string
+        - in: query
+          name: body
+          required: true
+          description: JSON-Objekt mit dem Namen der Liste
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+      responses:
+        200:
+          description: Liste angepasst
+        404:
+          description: ID nicht vorhanden
+        500:
+          description: Beim Schreiben ein Fehler aufgetreten
+  /todo-list:
+    get:
+      summary: Liefert eine Liste aller Todo-Listen zurück
+      responses:
+        200:
+          description: Liste aller vorhandenen Listen
+          content:
+            application/json:
+              schema:
+                type: object
     post:
-      tags: 
-        - Get
-      description: Endpunkt für POST Anfragen
+      summary: Fügt eine neue Todo-Liste hinzu
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: JSON-Objekt mit Namen der Liste
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+      responses:
+        200:
+          description: JSON-Objekt mit Namen und ID der neuen Liste
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  id:
+                    type: string
+        500:
+          description: Beim Schreiben ein Fehler aufgetreten
+  /todo-list/{list_id}/entry:
+    post:
+      summary: Fügt einen Eintrag zu einer bestehenden Todo-Liste hinzu.
+      description: |
+        URL-Element: ID der gewünschten Liste
+        JSON-Object im Body mit den Daten des Eintrags
+
+        Statuscode 200, wenn Liste angepasst wurde
+        Statuscode 404, wenn ID nicht vorhanden
+        JSON-Object im Body mit den Daten des Eintrags und der ID des neuen Eintrags
+      parameters:
+        - name: list_id
+          in: path
+          description: ID der gewünschten Liste
+          required: true
+          schema:
+            type: string
       requestBody:
-        description: JSON Objekt das alle Parameter beinhaltet
+        required: true
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/GeneralRequest"
-
-      responses: 
+              type: object
+              properties:
+                entry_data:
+                  type: string
+              example:
+                entry_data: "Sample entry data"
+      responses:
         '200':
-          "$ref": "#/components/responses/200"
-        '500':
-          "$ref": "#/components/responses/500"
-  /post:
-    get:
-      tags: 
-        - Post
-      description: Endpunkt für GET Anfragen
+          description: Liste angepasst
+        '404':
+          description: ID nicht vorhanden
+        default:
+          description: Ein unerwarteter Fehler ist aufgetreten.
+  /entry/{entry_id}:
+    patch:
+      summary: Aktualisiert einen bestehenden Eintrag.
+      description: |
+        URL-Element: ID des gewünschten Eintrags
+        JSON-Object im Body mit den Daten des Eintrags
+
+        Statuscode 200, wenn Eintrag angepasst wurde
+        Statuscode 404, wenn ID nicht vorhanden
+        Statuscode 500, wenn beim Schreiben ein Fehler auftritt
       parameters:
-        - name: param1
-          in: query
-          schema: 
-            type: string
-        - name: param2
-          in: query
+        - name: entry_id
+          in: path
+          description: ID des gewünschten Eintrags
+          required: true
           schema:
             type: string
-
-      responses: 
-        '200':
-          "$ref": "#/components/responses/200"
-        '500':
-          "$ref": "#/components/responses/500"
-    post:
-      tags: 
-        - Post
-      description: Endpunkt für POST Anfragen
       requestBody:
-        description: JSON Objekt das alle Parameter beinhaltet
+        required: true
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/GeneralRequest"
-
-      responses: 
+              type: object
+              properties:
+                entry_data:
+                  type: string
+              example:
+                entry_data: "Updated entry data"
+      responses:
         '200':
-          "$ref": "#/components/responses/200"
+          description: Eintrag angepasst
+        '404':
+          description: ID nicht vorhanden
         '500':
-          "$ref": "#/components/responses/500"
+          description: Beim Schreiben ist ein Fehler aufgetreten
+        default:
+          description: Ein unerwarteter Fehler ist aufgetreten.
 
-components:
-  schemas:
-    GeneralRequest:
-      type: object
-      properties:
-        param1: 
-          type: string
-          example: any value
-        param2:
-          type: string
-          example: Hello World
-    GeneralResponse:
-      type: object
-      properties:
-        param1: 
-          type: string
-          example: param1 that was passed in the request
-        param2:
-          type: string
-          example: param2 that was passed in the request
-  responses:
-    200:
-      description: OK
-      content:
-        application/json:
-          schema: 
-            "$ref": "#/components/schemas/GeneralResponse"
-    500:
-      description: Internal Server Error
+    delete:
+      summary: Löscht einen einzelnen Eintrag einer Todo-Liste.
+      description: |
+        URL-Element: ID des gewünschten Eintrags
+
+        Statuscode 200, wenn Eintrag gelöscht
+        Statuscode 404, wenn ID nicht vorhanden
+        Statuscode 500, wenn beim Schreiben ein Fehler auftritt
+      parameters:
+        - name: entry_id
+          in: path
+          description: ID des gewünschten Eintrags
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Eintrag gelöscht
+        '404':
+          description: ID nicht vorhanden
+        '500':
+          description: Beim Schreiben ist ein Fehler aufgetreten
+        default:
+          description: Ein unerwarteter Fehler ist aufgetreten.
+

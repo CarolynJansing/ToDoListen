@@ -46,7 +46,7 @@ def apply_cors_header(response):
     return response
 
 # define endpoint for getting and deleting existing todo lists
-@app.route('/list/<list_id>', methods=['GET', 'DELETE'])
+@app.route('/todo-list/<list_id>', methods=['GET', 'DELETE'])
 def handle_list(list_id):
     # find todo list depending on given list id
     list_item = None
@@ -69,7 +69,7 @@ def handle_list(list_id):
 
 
 # define endpoint for adding a new list
-@app.route('/list', methods=['POST'])
+@app.route('/todo-list', methods=['POST'])
 def add_new_list():
     # make JSON from POST data (even if content type is not set correctly)
     new_list = request.get_json(force=True)
@@ -81,12 +81,68 @@ def add_new_list():
 
 
 # define endpoint for getting all lists
-@app.route('/lists', methods=['GET'])
+@app.route('/todo-list', methods=['GET'])
 def get_all_lists():
     return jsonify(todo_lists)
 
+@app.route('/todo-list/<list_id>/entry', methods=['POST'])
+def add_todo_entry(list_id):
+    # Find the todo list with the given ID
+    todo_list = next((item for item in todo_lists if item['id'] == list_id), None)
+    if todo_list is None:
+        abort(404)
+
+    # Get the request data
+    entry_data = request.json.get('entry_data')
+
+    # Create a new entry
+    new_entry = {
+        'id': str(uuid.uuid4()),
+        'name': entry_data,
+        'description': '',
+        'list': list_id
+    }
+
+    # Add the entry to the list of todos
+    todos.append(new_entry)
+
+    return jsonify(new_entry), 200
+
+# PATCH /entry/{entry_id}
+@app.route('/entry/<entry_id>', methods=['PATCH'])
+def update_todo_entry(entry_id):
+    # Find the todo entry with the given ID
+    todo_entry = next((entry for entry in todos if entry['id'] == entry_id), None)
+    if todo_entry is None:
+        abort(404)
+
+    # Get the request data
+    entry_data = request.json.get('entry_data')
+
+    # Update the entry data
+    todo_entry['name'] = entry_data
+
+    return jsonify({'message': 'Todo entry updated'}), 200
+
+# DELETE /entry/{entry_id}
+@app.route('/entry/<entry_id>', methods=['DELETE'])
+def delete_todo_entry(entry_id):
+    # Find the todo entry with the given ID
+    todo_entry = next((entry for entry in todos if entry['id'] == entry_id), None)
+    if todo_entry is None:
+        abort(404)
+
+    # Remove the entry from the list of todos
+    todos.remove(todo_entry)
+
+    return jsonify({'message': 'Todo entry deleted'}), 200
+
+
+@app.route('/', methods=['GET'])
+def render_homepage():
+    return 'test'
 
 if __name__ == '__main__':
     # start Flask server
     app.debug = True
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=4000)
